@@ -55,6 +55,9 @@ RSpec.describe UnpublishEmailBuilder do
           expect(@imported_email.body).to include(redirect.url)
           expect(@imported_email.body).to include(redirect.title)
         end
+        it 'contains the UTM parameters in the body' do
+          expect(@imported_email.body).to include("utm_source", "utm_content")
+        end
       end
     end
   end
