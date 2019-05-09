@@ -31,6 +31,22 @@ private
   end
 
   def base_scope
+    # In the calling class (MatchedContentChangeGenerationService) it iterates over the result
+    # of lists, which will be subscriber lists and checkes how many of or_joined_subscriber_lists there are for each subscriber list
+    #
+    # This will result in an n+1 query which we want to avoid, we will want to use something like the following
+    # (but, you know, that actually includes the or_joined_subscriber_lists) to prevent this
+    #
+    #
+    #  SubscriberList
+    #       .joins(:or_joined_subscriber_list_subscriber_lists)
+    #       .includes(:or_joined_subscriber_lists, :or_joined_subscriber_list_subscriber_lists)
+    #       .where(document_type: ['', @document_type])
+    #       .where(email_document_supertype: ['', @email_document_supertype])
+    #       .where(government_document_supertype: ['', @government_document_supertype])
+    #       .where(content_purpose_supergroup: [nil, @content_purpose_supergroup])
+    #
+    #
     SubscriberList
       .where(document_type: ['', @document_type])
       .where(email_document_supertype: ['', @email_document_supertype])

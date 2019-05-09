@@ -17,6 +17,8 @@ private
     content_change_id = content_change.id
     batch = []
 
+    # Here we put all the subscriptions into batches and send them to #import_subscription_contents_batch
+    # in those batches
     grouped_subscription_ids_by_subscriber(content_change).each do |subscription_ids|
       records = subscription_ids.map do |subscription_id|
         [content_change_id, subscription_id]
@@ -33,6 +35,13 @@ private
     import_subscription_contents_batch(batch) unless batch.empty?
   end
 
+  # This takes a batch of arrays of content_ids matched to subscription_ids
+  # and creates SubscriptionContent records for each one
+  #
+  # This is probably where we want to intervene to create SubscriptionContent records
+  # that can have either a subscription_id OR a collection_id
+  #
+  # Then it runs ImmediateEmailGenerationWorke
   def import_subscription_contents_batch(batch)
     columns = %i(content_change_id subscription_id)
 
@@ -56,6 +65,9 @@ private
     end
   end
 
+
+  # Gets all the subscriptions where the matched content change is for our content change
+  # and groups them by subscription.subscriber_id
   def grouped_subscription_ids_by_subscriber(content_change)
     ContentChangeImmediateSubscriptionQuery.call(content_change: content_change)
       .group(:subscriber_id)

@@ -1,6 +1,7 @@
 class Subscription < ApplicationRecord
   belongs_to :subscriber
   belongs_to :subscriber_list
+  belongs_to :or_joined_subscriber_list
 
   has_many :subscription_contents
 

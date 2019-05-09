@@ -18,12 +18,16 @@ class UnprocessedSubscriptionContentsBySubscriberQuery
 private
 
   def subscription_contents
+
     SubscriptionContent
       .joins(:subscription)
       .includes(:subscription)
       .where(email_id: nil, subscriptions: { subscriber_id: subscriber_ids })
   end
 
+  # This wangs the subscription contents from the above into a nested hash where the subscriber_id
+  # is a key which has another hash where the content_change_id is a key for an array of subscriptions
+  # Because the results from this are passed into ImmediateEmailBuilder we can have any class here
   def transform_results(subscription_contents)
     subscription_contents.each_with_object({}) do |subscription_content, results|
       subscriber_id = subscription_content.subscription.subscriber_id

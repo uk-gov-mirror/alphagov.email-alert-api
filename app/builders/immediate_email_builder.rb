@@ -47,7 +47,7 @@ private
       <<~BODY
         #{presented_content_change(content_change)}
         ---
-        You’re getting this email because you subscribed to ‘#{subscriptions.first.subscriber_list.title}’ updates on GOV.UK.
+        You’re getting this email because you subscribed to ‘#{subscriber_list_title(subscriptions)}’ updates on GOV.UK.
 
         #{presented_unsubscribe_links(subscriptions)}
         #{presented_manage_subscriptions_links(address)}
@@ -69,6 +69,15 @@ private
     BODY
   end
 
+  # Hacky but just for demonstration
+  def subscriber_list_title(subscription)
+    if subscription.or_joined_subscriber_list
+      subscription.or_joined_subscriber_list.title
+    else
+      subscription.subscriber_list.title
+    end
+  end
+
   def presented_content_change(content_change)
     ContentChangePresenter.call(content_change, frequency: "immediate")
   end
@@ -81,7 +90,7 @@ private
     links_array = subscriptions.map do |subscription|
       UnsubscribeLinkPresenter.call(
         id: subscription.id,
-        title: subscription.subscriber_list.title,
+        title: subscriber_list_title(subscription),
       )
     end
 

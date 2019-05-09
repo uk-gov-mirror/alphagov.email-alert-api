@@ -49,6 +49,17 @@ RSpec.describe ContentChangeImmediateSubscriptionQuery do
       end
     end
 
+    context "with two subscriptions" do
+      before do
+        create(:subscription, subscriber_list: subscriber_list)
+        create(:subscription, subscriber_list: subscriber_list, subscriber: create(:subscriber, address: "test2@example.com"))
+      end
+
+      it "returns the subscriptions" do
+        expect(subject.count).to eq(2)
+      end
+    end
+
     context "with no subscriptions" do
       before do
         create(:subscription)

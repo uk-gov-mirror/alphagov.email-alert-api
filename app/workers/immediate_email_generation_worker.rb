@@ -12,6 +12,7 @@ class ImmediateEmailGenerationWorker
 
     ensure_only_running_once do
       subscribers.find_in_batches do |group|
+        # This pass through variable is a pain, refactor to make it a memoized method
         subscription_contents = grouped_subscription_contents(group.pluck(:id))
         update_content_change_cache(subscription_contents)
         import_and_associate_emails(group, subscription_contents)
@@ -21,6 +22,9 @@ class ImmediateEmailGenerationWorker
 
 private
 
+  # Here we create Email records that contain everything needed to send an email
+  # and then mark the subscription contents with the email id
+  # and then send the email ids off for sending
   def import_and_associate_emails(subscribers, subscription_contents)
     queue = []
 
@@ -87,13 +91,19 @@ private
     end
   end
 
+
+  # Here we get all the subscription content records for the subcscribers that
+  # haven't been associated with an email record
   def grouped_subscription_contents(subscriber_ids)
     UnprocessedSubscriptionContentsBySubscriberQuery.call(subscriber_ids)
   end
 
   def subscribers
+    # Here we grab subscribers where their subscription_content does not
+    # have an associated Email record
     SubscribersForImmediateEmailQuery.call
   end
+
 
   def map_subscriber_content_change_id_in_order(subscribers, subscription_contents)
     subscribers.flat_map do |subscriber|
@@ -103,6 +113,7 @@ private
     end
   end
 
+  # This is where it generates the email records
   def import_emails(subscribers, subscription_contents)
     email_params = map_subscriber_content_change_id_in_order(subscribers, subscription_contents) do |subscriber, content_change_id|
       {
