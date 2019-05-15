@@ -1,8 +1,12 @@
 class SubscriberListsController < ApplicationController
   def index
     subscriber_list = FindExactQuery.new(find_exact_query_params).exact_match
+
+    # NB: This also needs to find/create an OrJoinedSubscriberList if there are any existing_subscriber_list_slugs_to_be_or_joined
+    # in the same way that SubscriberListBuilderService does
+
     if subscriber_list
-      render json: subscriber_list.to_json
+      render json: subscriber_list.to_json(existing_subscriber_list_slugs_to_be_or_joined: existing_subscriber_list_slugs_to_be_or_joined)
     else
       render json: { message: "Could not find the subscriber list" }, status: 404
     end
@@ -10,6 +14,10 @@ class SubscriberListsController < ApplicationController
 
   def show
     subscriber_list = SubscriberList.find_by(slug: params[:slug])
+    if subscriber_list.nil?
+      subscriber_list = OrJoinedSubscriberList.find_by(slug: params[:slug])
+    end
+
     if subscriber_list
       render json: {
         subscribable: subscriber_list.attributes, # for backwards compatiblity
@@ -21,11 +29,12 @@ class SubscriberListsController < ApplicationController
   end
 
   def create
-    subscriber_list = SubscriberList.new(subscriber_list_params)
-    if subscriber_list.save
-      render json: subscriber_list.to_json, status: 201
+    subscriber_list_builder_service = SubscriberListBuilderService.new(subcriber_list_params, existing_subscriber_list_slugs_to_be_or_joined)
+    success, response = subscriber_list_builder_service.call
+    if success
+      render json: response, status: 201
     else
-      render json: { message: subscriber_list.errors.full_messages.to_sentence }, status: 422
+      render json: { message: response }, status: 422
     end
   end
 
@@ -33,11 +42,9 @@ private
 
   def subscriber_list_params
     title = params.fetch(:title)
-    slug = slugify(title)
 
     find_exact_query_params.merge(
       title: title,
-      slug: slug,
       signon_user_uid: current_user.uid,
     )
   end
@@ -61,15 +68,7 @@ private
     }
   end
 
-  def slugify(title)
-    slug = title.parameterize
-    index = 1
-
-    while SubscriberList.where(slug: slug).exists?
-      index += 1
-      slug = "#{title.parameterize}-#{index}"
-    end
-
-    slug
+  def existing_subscriber_list_slugs_to_be_or_joinedor_joined_slugs
+    params[:existing_subscriber_list_slugs_to_be_or_joined] || []
   end
 end

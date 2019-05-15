@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::API
   include GDS::SSO::ControllerMethods
 
-  before_action :authorise
+  # before_action :authorise
 
 private
 

@@ -2,29 +2,7 @@ class SubscriptionsController < ApplicationController
   def create
     return render json: { id: 0 }, status: :created if smoke_test_address?
 
-    existing_subscription = nil
-    subscription = nil
-
-    Subscription.transaction do
-      existing_subscription = Subscription.active.lock.find_by(
-        subscriber: subscriber,
-        subscriber_list: subscriber_list,
-      )
-
-      existing_subscription.end(reason: :frequency_changed) if existing_subscription
-
-      subscriber.activate! if subscriber.deactivated?
-
-      subscription = Subscription.create!(
-        subscriber: subscriber,
-        subscriber_list: subscriber_list,
-        frequency: frequency,
-        signon_user_uid: current_user.uid,
-        source: existing_subscription ? :frequency_changed : :user_signed_up
-      )
-    end
-
-    status = existing_subscription ? :ok : :created
+    [subscription, status] = SubscriptionBuilderService.new(subscriber, subscriber_list, frequency, current_user.uid).call
     render json: { id: subscription.id }, status: status
   end
 
@@ -83,10 +61,16 @@ private
   end
 
   def subscriber_list
-    @subscriber_list ||= SubscriberList.find(subscriber_list_id)
+    @subscriber_lists ||= begin
+      subscriber_list = SubscriberList.find_by(slug: subscriber_list_slug)
+      if subscriber_list.nil?
+        subscriber_list = OrJoinedSubscriberList.find(slug: subscriber_list_slug)
+      end
+      subscriber_list
+    end
   end
 
-  def subscriber_list_id
+  def subscriber_list_slug
     subscription_params[:subscribable_id] || subscription_params.require(:subscriber_list_id)
   end
 

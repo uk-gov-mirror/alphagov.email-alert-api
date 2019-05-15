@@ -16,6 +16,8 @@ class SubscriberList < ApplicationRecord
   has_many :or_joined_subscriber_list_subscriber_lists
   has_many :or_joined_subscriber_lists, through: :or_joined_subscriber_list_subscriber_lists
 
+  before_create :assign_slug
+
   scope :find_by_links_value, ->(content_id) do
       # For this query to return the content id has to be wrapped in a
       # double quote blame psql 9.
@@ -33,7 +35,7 @@ class SubscriberList < ApplicationRecord
   end
 
   def subscription_url
-    PublicUrlService.subscription_url(slug: slug)
+    PublicUrlService.subscription_url(slug: slug, existing_subscriber_list_slugs_to_be_or_joined: @existing_subscriber_list_slugs_to_be_or_joined)
   end
 
   def gov_delivery_id
@@ -45,8 +47,11 @@ class SubscriberList < ApplicationRecord
   end
 
   def to_json(options = {})
+    # This means that subscription_url will be able to chuck in any or_joined_slugs
+    @existing_subscriber_list_slugs_to_be_or_joined = options[:existing_subscriber_list_slugs_to_be_or_joined]
     options[:except] ||= %i{signon_user_uid}
-    options[:methods] ||= %i{subscription_url gov_delivery_id active_subscriptions_count}
+    # Return slug so that finder-frontend can collect these and use them to get a subscription url with multiple slugs
+    options[:methods] ||= %i{subscription_url gov_delivery_id active_subscriptions_count slug}
     super(options)
   end
 
@@ -59,6 +64,20 @@ class SubscriberList < ApplicationRecord
   end
 
 private
+
+
+  # TODO: Test that this works as expected!
+  def assign_slug
+    slug = title.parameterize
+    index = 1
+
+    while SubscriberList.where(slug: slug).exists?
+      index += 1
+      slug = "#{title.parameterize}-#{index}"
+    end
+
+    slug
+  end
 
   def tag_values_are_valid
     unless valid_subscriber_criteria(:tags)

@@ -3,8 +3,8 @@ Rails.application.routes.draw do
     root "welcome#index"
     resources :subscriber_lists, path: "subscriber-lists", only: %i[create]
     get "/subscriber-lists", to: "subscriber_lists#index"
-    get "/subscriber-lists/:slug", to: "subscriber_lists#show"
-    get "/subscribables/:slug", to: "subscriber_lists#show" # for backwards compatiblity
+    get "/subscriber-lists/*slug", to: "subscriber_lists#show"
+    get "/subscribables/*slug", to: "subscriber_lists#show" # for backwards compatiblity
 
     post "/unpublish-messages", to: "unpublish_messages#create"
 
