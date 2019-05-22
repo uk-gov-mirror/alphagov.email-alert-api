@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_05_22_114020) do
+ActiveRecord::Schema.define(version: 2019_05_22_114510) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -99,25 +99,9 @@ ActiveRecord::Schema.define(version: 2019_05_22_114020) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "content_change_id", null: false
-    t.bigint "or_joined_subscriber_list_id"
     t.index ["content_change_id", "subscriber_list_id"], name: "index_matched_content_changes_content_change_subscriber_list", unique: true
     t.index ["content_change_id"], name: "index_matched_content_changes_on_content_change_id"
     t.index ["subscriber_list_id"], name: "index_matched_content_changes_on_subscriber_list_id"
-  end
-
-  create_table "or_joined_subscriber_list_subscriber_lists", force: :cascade do |t|
-    t.integer "subscriber_list_id"
-    t.integer "or_joined_subscriber_list_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["id", "or_joined_subscriber_list_id"], name: "idx_or_joined_sub_list_sub_list_on_or_joined_sub_list_id"
-    t.index ["id", "subscriber_list_id"], name: "idx_or_joined_sub_list_sub_list_on_sub_list_id"
-  end
-
-  create_table "or_joined_subscriber_lists", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "slug"
   end
 
   create_table "subscriber_lists", id: :serial, force: :cascade do |t|
@@ -172,7 +156,6 @@ ActiveRecord::Schema.define(version: 2019_05_22_114020) do
     t.datetime "ended_at"
     t.integer "ended_reason"
     t.uuid "ended_email_id"
-    t.integer "or_joined_subscriber_list_id"
     t.index ["created_at"], name: "index_subscriptions_on_created_at"
     t.index ["subscriber_id", "subscriber_list_id"], name: "index_subscriptions_on_subscriber_id_and_subscriber_list_id", unique: true, where: "(ended_at IS NULL)"
     t.index ["subscriber_id"], name: "index_subscriptions_on_subscriber_id"
