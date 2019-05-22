@@ -6,7 +6,7 @@ RSpec.describe "Unsubscribing from a subscriber_list", type: :request do
   scenario "unsubscribing from an email uuid, then no longer receiving emails" do
     login_with_internal_app
 
-    subscriber_list_id = create_subscriber_list
+    subscriber_list_id = create_and_joined_facet_subscriber_list
     subscribe_to_subscriber_list(subscriber_list_id)
     create_content_change
     email_data = expect_an_email_was_sent

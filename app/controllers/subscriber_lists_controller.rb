@@ -39,7 +39,13 @@ private
       title: title,
       slug: slug,
       signon_user_uid: current_user.uid,
+      type: type
     )
+  end
+
+  def type
+    is_or_joined = params[:join_facets_with].present? && params[:join_facets_with] == "or"
+    is_or_joined ? 'OrJoinedFacetSubscriberList' : 'AndJoinedFacetSubscriberList'
   end
 
   def convert_legacy_params(link_or_tags)

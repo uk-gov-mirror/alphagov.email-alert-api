@@ -5,15 +5,15 @@ RSpec.describe "Creating a subscriber list", type: :request do
     end
 
     it "creates a subscriber_list" do
-      create_subscriber_list(tags: { topics: { any: ["oil-and-gas/licensing"] },
-                                     taxon_tree: { all: %w[taxon1 taxon2] } })
+      create_and_joined_facet_subscriber_list(tags: { topics: { any: ["oil-and-gas/licensing"] },
+                                                     taxon_tree: { all: %w[taxon1 taxon2] } })
 
       expect(SubscriberList.count).to eq(1)
     end
 
     it "returns a 201" do
-      create_subscriber_list(tags: { topics: { any: ["oil-and-gas/licensing"] },
-                                     taxon_tree: { all: %w[taxon1 taxon2] } })
+      create_and_joined_facet_subscriber_list(tags: { topics: { any: ["oil-and-gas/licensing"] },
+                                                     taxon_tree: { all: %w[taxon1 taxon2] } })
 
       expect(response.status).to eq(201)
     end
@@ -24,7 +24,7 @@ RSpec.describe "Creating a subscriber list", type: :request do
       end
 
       it "creates another subscriber list with a different slug" do
-        create_subscriber_list(title: "oil and gas", tags: { topics: { any: ["oil-and-gas/licensing"] } })
+        create_and_joined_facet_subscriber_list(title: "oil and gas", tags: { topics: { any: ["oil-and-gas/licensing"] } })
 
         expect(response.status).to eq(201)
 
@@ -35,7 +35,7 @@ RSpec.describe "Creating a subscriber list", type: :request do
     end
 
     it "returns the created subscriber list" do
-      create_subscriber_list(
+      create_and_joined_facet_subscriber_list(
         title: "oil and gas licensing",
         tags: { topics: { any: ["oil-and-gas/licensing"] } },
         links: { topics: { any: ["uuid-888"] },
@@ -85,14 +85,14 @@ RSpec.describe "Creating a subscriber list", type: :request do
     describe 'using legacy parameters' do
       it 'creates a new subscriber list' do
         expect {
-          create_subscriber_list(
+          create_and_joined_facet_subscriber_list(
             title: "oil and gas licensing",
             links: { topics: ["uuid-888"] }
           )
         }.to change { SubscriberList.count }.by(1)
       end
       it "returns an error if link isn't an array" do
-        create_subscriber_list(
+        create_and_joined_facet_subscriber_list(
           links: { topics: "uuid-888" },
           )
 
@@ -101,7 +101,7 @@ RSpec.describe "Creating a subscriber list", type: :request do
     end
 
     it "returns an error if tag isn't an array" do
-      create_subscriber_list(
+      create_and_joined_facet_subscriber_list(
         tags: { topics: { any: "oil-and-gas/licensing" } },
       )
 
@@ -109,14 +109,14 @@ RSpec.describe "Creating a subscriber list", type: :request do
     end
 
     it "successfully creates two SubscriberList objects with the same title" do
-      create_subscriber_list(title: "oil and gas", links: { taxons: { any: ["oil-and-gas"] } })
-      create_subscriber_list(title: "oil and gas", links: { policies: { any: ["oil-and-gas/licensing"] } })
+      create_and_joined_facet_subscriber_list(title: "oil and gas", links: { taxons: { any: ["oil-and-gas"] } })
+      create_and_joined_facet_subscriber_list(title: "oil and gas", links: { policies: { any: ["oil-and-gas/licensing"] } })
 
       expect(response.status).to eq(201)
     end
 
     it "returns an error if link isn't an array" do
-      create_subscriber_list(
+      create_and_joined_facet_subscriber_list(
         links: { topics: { any: "uuid-888" } },
       )
 
@@ -125,13 +125,13 @@ RSpec.describe "Creating a subscriber list", type: :request do
 
     describe "creating a subscriber list with a document_type" do
       it "returns a 201" do
-        create_subscriber_list(document_type: "travel_advice")
+        create_and_joined_facet_subscriber_list(document_type: "travel_advice")
 
         expect(response.status).to eq(201)
       end
 
       it "sets the document_type on the subscriber list" do
-        create_subscriber_list(
+        create_and_joined_facet_subscriber_list(
           tags: { countries: { any: %w[andorra] } },
           document_type: "travel_advice"
         )
@@ -143,13 +143,13 @@ RSpec.describe "Creating a subscriber list", type: :request do
 
     describe "creating a subscriber list with content_purpose_subgroups" do
       it "returns a 201" do
-        create_subscriber_list(tags: { content_purpose_subgroups: { any: %w[news] } })
+        create_and_joined_facet_subscriber_list(tags: { content_purpose_subgroups: { any: %w[news] } })
 
         expect(response.status).to eq(201)
       end
 
       it "sets content_purpose_subgroups on the subscriber list" do
-        create_subscriber_list(
+        create_and_joined_facet_subscriber_list(
           tags: {
             countries: { any: %w[andorra] },
             content_purpose_subgroups: { any: %w[news] }
@@ -164,7 +164,7 @@ RSpec.describe "Creating a subscriber list", type: :request do
     context "when creating a subscriber list with no tags or links" do
       context "and a document_type is provided" do
         it "returns a 201" do
-          create_subscriber_list(document_type: "travel_advice")
+          create_and_joined_facet_subscriber_list(document_type: "travel_advice")
 
           expect(response.status).to eq(201)
         end
@@ -173,7 +173,7 @@ RSpec.describe "Creating a subscriber list", type: :request do
 
     context "when creating a subscriber list with 'email' and 'government' document supertypes" do
       it "returns a 201" do
-        create_subscriber_list(
+        create_and_joined_facet_subscriber_list(
           email_document_supertype: "publications",
           government_document_supertype: "news_stories",
         )
@@ -187,7 +187,7 @@ RSpec.describe "Creating a subscriber list", type: :request do
       end
     end
 
-    def create_subscriber_list(payload = {})
+    def create_and_joined_facet_subscriber_list(payload = {})
       defaults = {
         title: "This is a sample title",
         tags: {},

@@ -12,8 +12,15 @@ module FeatureHelpers
     expect(response.status).to eq(200)
   end
 
-  def create_subscriber_list(overrides = {})
+  def create_and_joined_facet_subscriber_list(overrides = {})
     params = { title: "Example", tags: {}, links: {} }.merge(overrides)
+    post "/subscriber-lists", params: params.to_json, headers: JSON_HEADERS
+    expect(response.status).to eq(201)
+    data.dig(:subscriber_list, :id)
+  end
+
+  def create_or_joined_facet_subscriber_list(overrides = {})
+    params = { title: "Example", tags: {}, links: {}, join_facets_with: "or" }.merge(overrides)
     post "/subscriber-lists", params: params.to_json, headers: JSON_HEADERS
     expect(response.status).to eq(201)
     data.dig(:subscriber_list, :id)

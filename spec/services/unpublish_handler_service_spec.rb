@@ -8,7 +8,7 @@ RSpec.describe UnpublishHandlerService do
     @redirect = double(ContentItem, path: 'to/somewhere', title: 'redirect_title', url: 'http://host/to/somewhere')
   end
 
-  def create_subscriber_list(
+  def create_and_joined_facet_subscriber_list(
     links: {},
         tags: {},
         title: 'First Subscription',
@@ -80,7 +80,7 @@ RSpec.describe UnpublishHandlerService do
 
     context 'All subscriptions are ended' do
       before :each do
-        @subscriber_list = create_subscriber_list(links: { taxon_tree: { any: [@content_id] } })
+        @subscriber_list = create_and_joined_facet_subscriber_list(links: { taxon_tree: { any: [@content_id] } })
         @subscriber_list.subscriptions.each do |subscription|
           subscription.end(reason: :unpublished)
         end
@@ -90,10 +90,10 @@ RSpec.describe UnpublishHandlerService do
 
     context 'there are subscriber lists with different taxons' do
       before :each do
-        @subscriber_list = create_subscriber_list(links: { taxon_tree: { any: [@content_id] } })
-        create_subscriber_list(links: { taxon_tree: { all: [SecureRandom.uuid] } },
-                                title: 'Second Subscriber List',
-                                address: 'test2@example.com')
+        @subscriber_list = create_and_joined_facet_subscriber_list(links: { taxon_tree: { any: [@content_id] } })
+        create_and_joined_facet_subscriber_list(links: { taxon_tree: { all: [SecureRandom.uuid] } },
+                                                title: 'Second Subscriber List',
+                                                address: 'test2@example.com')
       end
       it_behaves_like 'it_sends_an_email_with_body_including', 'has ended because this topic no longer exists on GOV.UK'
       it_behaves_like 'it_unsubscribes_all_subscribers'
@@ -101,7 +101,7 @@ RSpec.describe UnpublishHandlerService do
 
     context 'there is a taxon_tree subscriber list with the any operator' do
       before :each do
-        @subscriber_list = create_subscriber_list(links: { taxon_tree: { any: [@content_id] } })
+        @subscriber_list = create_and_joined_facet_subscriber_list(links: { taxon_tree: { any: [@content_id] } })
       end
       it_behaves_like 'it_sends_an_email_with_body_including', 'has ended because this topic no longer exists on GOV.UK'
       it_behaves_like 'it_unsubscribes_all_subscribers'
@@ -109,7 +109,7 @@ RSpec.describe UnpublishHandlerService do
 
     context 'there is a taxon_tree subscriber list with the all operator' do
       before :each do
-        @subscriber_list = create_subscriber_list(links: { taxon_tree: { all: [@content_id] } })
+        @subscriber_list = create_and_joined_facet_subscriber_list(links: { taxon_tree: { all: [@content_id] } })
       end
       it_behaves_like 'it_sends_an_email_with_body_including', 'has ended because this topic no longer exists on GOV.UK'
       it_behaves_like 'it_unsubscribes_all_subscribers'
@@ -117,7 +117,7 @@ RSpec.describe UnpublishHandlerService do
 
     context 'there is a policy area subscriber list' do
       before :each do
-        @subscriber_list = create_subscriber_list(links: { policy_areas: { any: [@content_id] } })
+        @subscriber_list = create_and_joined_facet_subscriber_list(links: { policy_areas: { any: [@content_id] } })
       end
       it_behaves_like 'it_sends_an_email_with_body_including',
                       "email updates about 'First Subscription"
@@ -126,7 +126,7 @@ RSpec.describe UnpublishHandlerService do
 
     context 'there is a policy subscriber list' do
       before :each do
-        @subscriber_list = create_subscriber_list(links: { policies: { any: [@content_id] } })
+        @subscriber_list = create_and_joined_facet_subscriber_list(links: { policies: { any: [@content_id] } })
       end
       it_behaves_like 'it_sends_an_email_with_body_including',
                       "email updates about 'First Subscription"
@@ -135,7 +135,7 @@ RSpec.describe UnpublishHandlerService do
 
     context 'there is a non-taxon subscriber list' do
       before :each do
-        create_subscriber_list(links: {
+        create_and_joined_facet_subscriber_list(links: {
             'world_locations' => { any: [SecureRandom.uuid, SecureRandom.uuid] },
             'another' => { any: [@content_id] }
         })
@@ -145,7 +145,7 @@ RSpec.describe UnpublishHandlerService do
 
     context 'with multiple subscriber lists' do
       before :each do
-        @first_subscriber_list = create_subscriber_list(
+        @first_subscriber_list = create_and_joined_facet_subscriber_list(
           links: {
             taxon_tree: { any: [@content_id] },
             world_locations: { any: [SecureRandom.uuid] }
@@ -153,7 +153,7 @@ RSpec.describe UnpublishHandlerService do
           title: 'First Subscriber List',
           address: 'test1@example.com'
         )
-        @second_subscriber_list = create_subscriber_list(
+        @second_subscriber_list = create_and_joined_facet_subscriber_list(
           links: {
             taxon_tree: { all: [@content_id] },
             world_locations: { any: [SecureRandom.uuid] }

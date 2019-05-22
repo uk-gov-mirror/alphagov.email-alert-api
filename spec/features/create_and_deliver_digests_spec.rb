@@ -113,11 +113,11 @@ RSpec.describe "creating and delivering digests", type: :request do
     list_one_topic_id = "0eb5d0f0-d384-4f27-9da8-3f9e9b22a820"
     list_two_topic_id = "a915e039-070b-4633-813d-187af61cad7a"
 
-    subscriber_list_one_id = create_subscriber_list(title: "Subscriber list one", links: {
+    subscriber_list_one_id = create_and_joined_facet_subscriber_list(title: "Subscriber list one", links: {
       topics: { any: [list_one_topic_id] }
     })
 
-    subscriber_list_two_id = create_subscriber_list(title: "Subscriber list two", links: {
+    subscriber_list_two_id = create_and_joined_facet_subscriber_list(title: "Subscriber list two", links: {
       topics: { any: [list_two_topic_id] }
     })
 
@@ -341,11 +341,11 @@ RSpec.describe "creating and delivering digests", type: :request do
     list_one_taxon_id = "86db0cbd-a1f9-4218-b571-ca0550265e33"
     list_two_taxon_id = "6416e4e0-c0c1-457a-8337-4bf8ed9d5f80"
 
-    subscriber_list_one_id = create_subscriber_list(title: "Subscriber list one", links: {
+    subscriber_list_one_id = create_and_joined_facet_subscriber_list(title: "Subscriber list one", links: {
       topics: { any: [list_one_topic_id] }
     })
 
-    subscriber_list_two_id = create_subscriber_list(title: "Subscriber list two", links: {
+    subscriber_list_two_id = create_and_joined_facet_subscriber_list(title: "Subscriber list two", links: {
       taxon_tree: { all: [list_one_taxon_id, list_two_taxon_id] }
     })
 
