@@ -38,31 +38,32 @@ private
   def body(content_change, subscriptions, address)
     if Array(subscriptions).empty?
       <<~BODY
+        #{opening_line}
+
         #{presented_content_change(content_change)}
-        ---
+
         #{feedback_link.strip}
       BODY
     else
       <<~BODY
+        #{opening_line}
+
         #{presented_content_change(content_change)}
-        ---
         #{permission_reminder(subscriptions.first.subscriber_list.title)}
 
-        #{presented_unsubscribe_links(subscriptions)}
         #{presented_manage_subscriptions_links(address)}
 
         &nbsp;
-
         #{feedback_link.strip}
       BODY
     end
   end
-
-  def presented_unsubscribe_links(subscriptions)
-    links_array = subscriptions.map do |subscription|
-      presented_unsubscribe_link(subscription.id, subscription.subscriber_list.title)
-    end
-
-    links_array.join("\n")
-  end
+  #
+  # def presented_unsubscribe_links(subscriptions)
+  #   links_array = subscriptions.map do |subscription|
+  #     presented_unsubscribe_link(subscription.id, subscription.subscriber_list.title)
+  #   end
+  #
+  #   links_array.join("\n")
+  # end
 end

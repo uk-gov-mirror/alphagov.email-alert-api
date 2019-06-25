@@ -30,6 +30,8 @@ private
 
   def body
     <<~BODY
+      #{opening_line}
+
       #{presented_results}
 
       &nbsp;
