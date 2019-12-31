@@ -7,6 +7,10 @@ class TagsValidator < ActiveModel::EachValidator
     if invalid_tags(tags).any?
       record.errors.add(attribute, "#{invalid_tags(tags).to_sentence} are not valid tags.")
     end
+
+    if invalid_formatted_tags(tags).any?
+      record.errors.add(attribute, "#{invalid_formatted_tags(tags).to_sentence} have a value with an invalid format.")
+    end
   end
 
 private
@@ -20,6 +24,15 @@ private
       hash.all? do |operator, values|
         %i[all any].include?(operator) && values.is_a?(Array)
       end
+    end
+  end
+
+  def invalid_formatted_tags(tags)
+    @invalid_formatted_tags ||= begin
+      tags.reject { |_key, tag_values|
+        values = tag_values.fetch(:any, []) + tag_values.fetch(:all, [])
+        values.find { |tag| tag.match?(/\A[a-zA-Z0-9-_\/]*\z/) }
+      }.keys
     end
   end
 end
