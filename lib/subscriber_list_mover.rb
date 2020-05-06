@@ -17,15 +17,13 @@ class SubscriberListMover
     destination_subscriber_list = SubscriberList.find_by(slug: to_slug)
     raise "Destination subscriber list #{to_slug} does not exist" if destination_subscriber_list.nil?
 
-    subscribers = source_subscriber_list.subscribers.activated
-    puts "#{subscribers.count} active subscribers moving from #{from_slug} to #{to_slug}"
+    subscriptions = source_subscriber_list.subscriptions.active
+    puts "#{subscriptions.count} active subscribers moving from #{from_slug} to #{to_slug}"
 
-    subscribers.each do |subscriber|
+    subscriptions.each do |subscription|
       Subscription.transaction do
-        existing_subscription = Subscription.active.find_by(
-          subscriber: subscriber,
-          subscriber_list: source_subscriber_list,
-        )
+        existing_subscription = subscription
+        subscriber = Subscriber.find_by(id: subscription.subscriber_id)
 
         next unless existing_subscription
 
@@ -37,7 +35,7 @@ class SubscriberListMover
         )
 
         if subscribed_to_destination_subscriber_list.nil?
-          puts "Moving #{subscriber.address} with ID #{subscriber.id} to #{destination_subscriber_list.title} list"
+          puts "Moving #{subscriber.address} with ID #{subscriber.subscriber_id} to #{destination_subscriber_list.title} list"
 
           Subscription.create!(
             subscriber: subscriber,
@@ -49,7 +47,9 @@ class SubscriberListMover
       end
     end
 
-    puts "#{subscribers.count} active subscribers moved from #{from_slug} to #{to_slug}"
+    puts source_subscriber_list
+    puts send_email
+    #puts "#{subscriptions.count} active subscribers moved from #{from_slug} to #{to_slug}"
 
     if send_email
       email_change_to_subscribers(source_subscriber_list)
