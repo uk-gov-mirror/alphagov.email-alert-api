@@ -20,6 +20,10 @@ class SubscriberListMover
     subscriptions = source_subscriber_list.subscriptions.active
     puts "#{subscriptions.count} active subscribers moving from #{from_slug} to #{to_slug}"
 
+    if send_email
+      email_change_to_subscribers(source_subscriber_list)
+    end
+
     subscriptions.each do |subscription|
       Subscription.transaction do
         existing_subscription = subscription
@@ -45,14 +49,6 @@ class SubscriberListMover
           )
         end
       end
-    end
-
-    puts source_subscriber_list
-    puts send_email
-    #puts "#{subscriptions.count} active subscribers moved from #{from_slug} to #{to_slug}"
-
-    if send_email
-      email_change_to_subscribers(source_subscriber_list)
     end
   end
 
