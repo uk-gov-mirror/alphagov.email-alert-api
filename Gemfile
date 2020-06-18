@@ -17,6 +17,7 @@ gem "json-schema", "~> 2.8"
 gem "jwt", "~> 2.2"
 gem "nokogiri", "~> 1.10"
 gem "notifications-ruby-client", "~> 5.1"
+gem "openid_connect"
 gem "plek", "~> 3.0"
 gem "redcarpet", "~> 3.5"
 
