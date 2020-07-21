@@ -60,7 +60,7 @@ private
     )
   rescue StandardError => e
     GovukError.notify(e)
-    :internal_failure
+    :retryable_failure
   end
 
   def record_first_attempt_metrics

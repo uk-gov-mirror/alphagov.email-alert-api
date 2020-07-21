@@ -21,15 +21,23 @@ class NotifyProvider
 
     Metrics.sent_to_notify_successfully
     :sending
-  rescue Notifications::Client::RequestError => e
+  # this rescue should catch all the errors we anticipate Notify raising
+  # that don't require us to take action
+  rescue Notifications::Client::RequestError, Net::Timeout => e
     Metrics.failed_to_send_to_notify
-    unless e.message.end_with?("Not a valid email address")
-      GovukError.notify(e, tags: { provider: "notify" })
-    end
-    :technical_failure
+    # log error
+    determine_error_status(e)
   end
 
 private
 
   attr_reader :client, :template_id
+
+  def determine_error_status(error)
+    return :retryable_failure unless error.is_a?(Notifications::Client::ClientError)
+
+    # TODO set up a permanent failure scenario for invalid email address
+
+    :retryable_failure
+  end
 end
