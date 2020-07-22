@@ -3,6 +3,10 @@ class Email < ApplicationRecord
   # creation as this table is populated by the #insert_all bulk method
 
   COURTESY_EMAIL = "govuk-email-courtesy-copies@digital.cabinet-office.gov.uk".freeze
+
+  # Time period that we're happy to retry sending an email before giving up
+  RETRY_TIMEOUT = 24.hours
+
   has_many :delivery_attempts
 
   scope :archivable,
@@ -22,5 +26,20 @@ class Email < ApplicationRecord
     return insert_all!(records) unless records.size == batch_size
 
     Metrics.email_bulk_insert(batch_size) { insert_all!(records) }
+  end
+
+  def mark_as_sent(finished_sending_at)
+    email.update!(
+      status: :sent,
+      finished_sending_at: finished_sending_at,
+    )
+  end
+
+  def mark_as_failed(failure_reason, finished_sending_at)
+    email.update!(
+      status: :failed,
+      failure_reason: failure_reason,
+      finished_sending_at: finished_sending_at,
+    )
   end
 end

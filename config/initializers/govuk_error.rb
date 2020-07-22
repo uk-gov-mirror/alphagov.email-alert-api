@@ -14,4 +14,9 @@ GovukError.configure do |config|
 
     !(data_sync_ignored_error && data_sync_environment && data_sync_time)
   end
+
+  config.excluded_exceptions += [
+    "DeliveryRequestWorker::RateLimitExceededError",
+    "DeliveryRequestWorker::RetryableFailureError",
+  ]
 end

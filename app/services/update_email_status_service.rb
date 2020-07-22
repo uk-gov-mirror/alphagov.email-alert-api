@@ -4,8 +4,7 @@ class UpdateEmailStatusService < ApplicationService
   end
 
   def call
-    handle_technical_failure if delivery_attempt.technical_failure?
-    handle_temporary_failure if delivery_attempt.temporary_failure?
+    handle_retryable_failure if delivery_attempt.retryable_failure?
     handle_permanent_failure if delivery_attempt.permanent_failure?
     handle_delivered if delivery_attempt.delivered?
   end
@@ -13,46 +12,24 @@ class UpdateEmailStatusService < ApplicationService
 private
 
   attr_reader :delivery_attempt
-  delegate :email, to: :delivery_attempt
+  delegate :email, :finished_sending_at, to: :delivery_attempt
 
-  def handle_technical_failure
-    email.update!(
-      status: :failed,
-      failure_reason: :technical_failure,
-      finished_sending_at: delivery_attempt.finished_sending_at,
-    )
-  end
-
-  def handle_temporary_failure
+  def handle_retryable_failure
     return unless retries_exhausted?
 
-    email.update!(
-      status: :failed,
-      failure_reason: :retries_exhausted_failure,
-      finished_sending_at: delivery_attempt.finished_sending_at,
-    )
+    email.mark_as_failed(:retries_exhausted_failure, finished_sending_at)
   end
 
   def retries_exhausted?
-    first_completed = DeliveryAttempt
-                       .where(email: email, status: :temporary_failure)
-                       .minimum(:completed_at)
-
-    first_completed && first_completed < StatusUpdateService::TEMPORARY_FAILURE_RETRY_TIMEOUT.ago
+    first_completed = DeliveryAttempt.where(email: email).minimum(:completed_at)
+    first_completed && first_completed < Email::RETRY_TIMEOUT.ago
   end
 
   def handle_permanent_failure
-    email.update!(
-      status: :failed,
-      failure_reason: :permanent_failure,
-      finished_sending_at: delivery_attempt.finished_sending_at,
-    )
+    email.mark_as_failed(:permanent_failure, finished_sending_at)
   end
 
   def handle_delivered
-    email.update!(
-      status: :sent,
-      finished_sending_at: delivery_attempt.finished_sending_at,
-    )
+    email.mark_as_sent(:sent, finished_sending_at)
   end
 end

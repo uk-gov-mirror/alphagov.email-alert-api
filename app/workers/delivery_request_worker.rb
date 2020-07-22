@@ -1,17 +1,21 @@
 class DeliveryRequestWorker
   class RateLimitExceededError < RuntimeError; end
+  class RetryableFailureError < RuntimeError; end
 
   include Sidekiq::Worker
 
-  sidekiq_options retry: 9
+  sidekiq_options retry: 15
 
   sidekiq_retries_exhausted do |msg, error|
-    next unless error.is_a?(RateLimitExceededError)
-
     email_id, metrics = msg["args"]
-    GovukStatsd.increment("delivery_request_worker.rescheduled")
-    DeliveryRequestWorker.set(queue: msg["queue"])
-                         .perform_in(5.minutes, email_id, metrics)
+
+    if error.is_a?(RateLimitExceededError)
+      GovukStatsd.increment("delivery_request_worker.rescheduled")
+      DeliveryRequestWorker.set(queue: msg["queue"])
+                           .perform_in(5.minutes, email_id, metrics)
+    else
+      Email.find(email_id).mark_as_failed(:retries_exhausted_failure, Time.zone.now)
+    end
   end
 
   def perform(email_id, metrics = {})
@@ -26,11 +30,12 @@ class DeliveryRequestWorker
       Email.find(email_id)
     end
 
-    attempted = DeliveryRequestService.call(
+    attempt = DeliveryRequestService.call(
       email: email,
       metrics: parsed_metrics(metrics),
     )
-    increment_rate_limiter if attempted
+    increment_rate_limiter if attempt
+    raise RetryableFailureError if attempt.retryable_failure?
   end
 
   def self.perform_async_in_queue(*args, queue:)

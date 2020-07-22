@@ -1,6 +1,5 @@
 class StatusUpdateService < ApplicationService
   TEMPORARY_FAILURE_RETRY_DELAY = 6.hours
-  TEMPORARY_FAILURE_RETRY_TIMEOUT = 24.hours
 
   def initialize(reference:, status:, completed_at:, sent_at:, user: nil)
     @reference = reference
