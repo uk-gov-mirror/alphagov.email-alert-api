@@ -20,7 +20,7 @@ class OidcClient
 
   def auth_uri(nonce)
     client.authorization_uri(
-      scope: %i[profile email],
+      scope: %i[email],
       state: nonce,
       nonce: nonce,
     )
