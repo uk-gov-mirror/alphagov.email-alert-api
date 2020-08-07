@@ -57,7 +57,7 @@ private
   end
 
   def oidc
-    @oidc ||= OIDCClient.new(
+    @oidc ||= OidcClient.new(
       ENV["OIDC_PROVIDER_URI"],
       ENV["OIDC_CLIENT_ID"],
       ENV["OIDC_CLIENT_SECRET"],

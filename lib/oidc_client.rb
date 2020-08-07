@@ -1,6 +1,6 @@
 require "openid_connect"
 
-class OIDCClient
+class OidcClient
   attr_reader :client_id,
               :destination,
               :provider_uri

@@ -14,7 +14,7 @@ RSpec.describe "Subscribers OIDC", type: :request do
     end
 
     before do
-      allow_any_instance_of(OIDCClient).to receive(:auth_uri).and_return("https://www.gov.uk")
+      allow_any_instance_of(OidcClient).to receive(:auth_uri).and_return("https://www.gov.uk")
     end
 
     it "returns a 200" do
@@ -54,7 +54,7 @@ RSpec.describe "Subscribers OIDC", type: :request do
       allow(user_info).to receive(:email).and_return(address)
       allow(user_info).to receive(:email_verified).and_return(email_verified)
       allow(user_info).to receive(:sub).and_return(sub)
-      allow_any_instance_of(OIDCClient).to receive(:handle_redirect).with(code, nonce).and_return(user_info)
+      allow_any_instance_of(OidcClient).to receive(:handle_redirect).with(code, nonce).and_return(user_info)
     end
 
     it "returns a 200" do
