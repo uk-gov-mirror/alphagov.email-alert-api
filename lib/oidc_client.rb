@@ -20,7 +20,7 @@ class OidcClient
 
   def auth_uri(nonce)
     client.authorization_uri(
-      scope: %i[email],
+      scope: %i[email test_scope_write],
       state: nonce,
       nonce: nonce,
     )
@@ -35,7 +35,10 @@ class OidcClient
     access_token = client.access_token!
     id_token = OpenIDConnect::ResponseObject::IdToken.decode access_token.id_token, discover.jwks
     id_token.verify! client_id: client_id, issuer: discover.issuer, nonce: nonce
-    access_token.userinfo!
+    {
+      access_token: access_token,
+      user_info: access_token.userinfo!,
+    }
   end
 
 private
