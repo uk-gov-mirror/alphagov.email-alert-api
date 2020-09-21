@@ -16,6 +16,8 @@ class DeliveryRequestWorker
   end
 
   def perform(email_id, metrics, queue)
+    raise ProviderCommunicationFailureError unless ENV["SUCCEED"]
+
     if rate_limit_exceeded?
       logger.warn("Rescheduling email #{email_id} due to exceeding rate limit")
       GovukStatsd.increment("delivery_request_worker.rescheduled")
