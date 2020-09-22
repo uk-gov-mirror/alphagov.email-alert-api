@@ -1,10 +1,12 @@
 #!/usr/bin/env groovy
 
-library("govuk")
-
-node("postgresql-9.6") {
-  govuk.setEnvar("TEST_DATABASE_URL", "postgresql://email-alert-api:email-alert-api@localhost/email-alert-api_test")
-  govuk.buildProject(
-    rubyLintDiff: false
-  )
+node {
+    step([
+        $class: "GitHubCommitStatusSetter",
+        commitShaSource: [$class: "ManuallyEnteredShaSource", sha: "ff4a02d7f9545fa07af214bae90ca55cf5ba564c"],
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/alphagov/whitehall"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "continuous-integration/jenkins/publishing-e2e-tests"],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: "Testing Jenkins communications", state: "FAILED"]] ]
+    ]);
 }
