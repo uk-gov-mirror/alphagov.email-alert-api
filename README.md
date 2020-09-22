@@ -1,5 +1,6 @@
 # email-alert-api
 
+
 Sends emails to users that subscribe to specific GOV.UK email alerts.
 
 Provides a consistent internal interface to external email
