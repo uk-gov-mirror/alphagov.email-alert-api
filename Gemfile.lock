@@ -1,3 +1,14 @@
+GIT
+  remote: https://github.com/alphagov/govuk_app_config.git
+  revision: 4130f3d21782e15dcc07b054f71c006ca845db2a
+  branch: datasync-errors-class-inheritance
+  specs:
+    govuk_app_config (2.5.0)
+      logstasher (>= 1.2.2, < 1.4.0)
+      sentry-raven (~> 3.1.1)
+      statsd-ruby (~> 1.4.0)
+      unicorn (>= 5.4, < 5.8)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -124,11 +135,6 @@ GEM
       warden-oauth2 (~> 0.0.1)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
-    govuk_app_config (2.5.0)
-      logstasher (>= 1.2.2, < 1.4.0)
-      sentry-raven (~> 3.1.1)
-      statsd-ruby (~> 1.4.0)
-      unicorn (>= 5.4, < 5.8)
     govuk_document_types (0.9.2)
     govuk_sidekiq (4.0.0)
       gds-api-adapters (>= 19.1.0)
@@ -384,7 +390,7 @@ DEPENDENCIES
   faraday
   gds-api-adapters
   gds-sso
-  govuk_app_config
+  govuk_app_config!
   govuk_document_types
   govuk_sidekiq
   json-schema

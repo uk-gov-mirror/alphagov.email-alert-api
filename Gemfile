@@ -7,7 +7,7 @@ gem "bootsnap", require: false
 gem "faraday"
 gem "gds-api-adapters"
 gem "gds-sso"
-gem "govuk_app_config"
+gem "govuk_app_config", git: 'https://github.com/alphagov/govuk_app_config.git', branch: "datasync-errors-class-inheritance"
 gem "govuk_document_types"
 gem "govuk_sidekiq"
 gem "json-schema"
