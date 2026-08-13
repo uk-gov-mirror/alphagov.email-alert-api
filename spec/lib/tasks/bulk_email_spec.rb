@@ -1,13 +1,10 @@
 RSpec.describe "bulk_email" do
+  let(:stdin_inputs) { %W[subject\n body\n] }
+
   describe "for_lists" do
     before do
       Rake::Task["bulk_email:for_lists"].reenable
-    end
-
-    around(:each) do |example|
-      ClimateControl.modify(SUBJECT: "subject", BODY: "body") do
-        example.run
-      end
+      allow($stdin).to receive(:gets).and_return(*stdin_inputs)
     end
 
     it "builds emails for a subscriber list" do
@@ -60,12 +57,7 @@ RSpec.describe "bulk_email" do
 
     before do
       Rake::Task["bulk_email:for_lists_and_explicitly_including_addresses"].reenable
-    end
-
-    around(:each) do |example|
-      ClimateControl.modify(SUBJECT: "subject", BODY: "body") do
-        example.run
-      end
+      allow($stdin).to receive(:gets).and_return(*stdin_inputs)
     end
 
     it "states how many emails are being sent, and to where" do
